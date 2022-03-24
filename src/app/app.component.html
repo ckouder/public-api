@@ -15,6 +15,7 @@
   <nb-layout-column>
     <nb-card size="giant">
       <nb-card-body>
+        <h1 *ngIf="!url" class="text-hint">Select a category to begin!</h1>
         <iframe frameborder="0" #container style="height:98%;width:100%;"></iframe>
       </nb-card-body>
     </nb-card>

@@ -12,7 +12,7 @@ import { APIResponse, PublicApiService } from './public-api.service';
 export class AppComponent {
   title = 'public-api'
   items: NbMenuItem[] = []
-  url: string = 'https://www.google.com'
+  url: string = ''
 
   @ViewChild('container', { static: true }) container !: ElementRef
 
@@ -42,6 +42,7 @@ export class AppComponent {
     this.menuService.onItemClick().subscribe((value: NbMenuBag) => {
       console.log(this.container.nativeElement, value.item.data)
       if (value.item.data) {
+        this.url = value.item.data
         this.container.nativeElement.src = value.item.data
       }
     })
