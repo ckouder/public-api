@@ -29,16 +29,6 @@ export class AppComponent {
   ngOnInit() {
     this.buildSubMenu()
 
-    this.menuService.onSubmenuToggle().subscribe((value: NbMenuBag) => {
-      if (value.item.children?.length) { return }
-      this.publicApiService.getEntries(new HttpParams({
-        fromObject: { category: value.item.title }
-      })).subscribe((response) => {
-        let items = response.entries.map((value) => this.createAPIMenuItem(value))
-        value.item.children = items
-      })
-    })
-
     this.menuService.onItemClick().subscribe((value: NbMenuBag) => {
       console.log(this.container.nativeElement, value.item.data)
       if (value.item.data) {
@@ -49,17 +39,32 @@ export class AppComponent {
   }
 
   buildSubMenu() {
-    this.publicApiService.getCategories().subscribe((response) => {
-      let items = response.categories.map((category) => this.createSubMenuItem(category))
-      this.items = items;
-    })
-  }
+    this.publicApiService.getEntries().subscribe((response) => {
+      let entries: { [key: string]: NbMenuItem[] } = {}
+      for (let entry of response.entries) {
+        if (entries[entry.Category] === undefined) {
+          entries[entry.Category] = []
+        }
+        entries[entry.Category].push({
+          title: entry.API,
+          data: entry.Link,
+          badge: entry.Auth === '' && !entry.HTTPS ? undefined : {
+            text: entry.HTTPS ? (entry.Auth ? `Https + ${entry.Auth}` : 'Https') : entry.Auth,
+            status: entry.Auth === 'apiKey' ? 'primary' : 'success'
+          }
+        })
+      }
 
-  createSubMenuItem(category: string): NbMenuItem {
-    let item = new NbMenuItem()
-    item.title = category
-    item.children = []
-    return item
+      let items: NbMenuItem[] = []
+      for (let entry of Object.keys(entries)) {
+        items.push({
+          title: entry,
+          children: entries[entry]
+        })
+      }
+
+      this.items = items
+    })
   }
 
   createAPIMenuItem(value: APIResponse): NbMenuItem {
